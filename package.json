@@ -1,0 +1,36 @@
+{
+  "name": "derail-valley-discord-dispatcher",
+  "version": "1.0.3",
+  "description": "Discord.js slash-command integration for Derail Valley Advanced Dispatcher System",
+  "main": "src/index.js",
+  "bin": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "check": "node scripts/check-project.js",
+    "build": "node scripts/build.js win",
+    "build:linux": "node scripts/build.js linux"
+  },
+  "pkg": {
+    "scripts": [
+      "src/**/*.js"
+    ],
+    "assets": [
+      "config/config.example.json"
+    ]
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "discord.js": "14.27.0",
+    "undici": "^7.16.0",
+    "ws": "^8.18.3"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.14.2"
+  }
+}
