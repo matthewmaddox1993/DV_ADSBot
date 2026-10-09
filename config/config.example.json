@@ -1,0 +1,43 @@
+{
+  "discord": {
+    "token": "PASTE_DISCORD_BOT_TOKEN_HERE",
+    "clientId": "PASTE_DISCORD_APPLICATION_ID_HERE",
+    "guildId": "PASTE_DISCORD_SERVER_ID_HERE",
+    "deployGlobally": false,
+    "ephemeralResponses": true,
+    "activity": "Derail Valley dispatch"
+  },
+  "dispatcher": {
+    "baseUrl": "https://localhost:7246",
+    "username": "DiscordBot",
+    "password": "CHANGE_THIS_PASSWORD",
+    "caFile": "./config/dispatcher-ca.cer",
+    "rejectUnauthorized": true,
+    "connectTimeoutMs": 10000,
+    "commandTimeoutMs": 22000,
+    "longCommandTimeoutMs": 240000,
+    "reconnectMinMs": 1000,
+    "reconnectMaxMs": 15000
+  },
+  "permissions": {
+    "allowEveryoneView": false,
+    "ownerUserIds": [
+      "PASTE_YOUR_DISCORD_USER_ID_HERE"
+    ],
+    "viewerRoleIds": [],
+    "dispatcherRoleIds": [],
+    "adminRoleIds": []
+  },
+  "channels": {
+    "alerts": ""
+  },
+  "board": {
+    "enabled": true,
+    "refreshSeconds": 15
+  },
+  "alerts": {
+    "enabled": false,
+    "connectionChanges": true,
+    "dispatcherEvents": true
+  }
+}
