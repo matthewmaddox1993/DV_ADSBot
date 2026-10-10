@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "releasePage": "https://github.com/matthewmaddox1993/DV_ADSBot/releases",
+  "source": {
+    "repository": "https://github.com/matthewmaddox1993/DV_ADSBot.git",
+    "branch": "main"
+  },
+  "assets": {
+    "win32-x64": {
+      "version": "1.0.0",
+      "url": "https://github.com/matthewmaddox1993/DV_ADSBot/releases/download/v1.0.0/DerailValleyBot-1.0.0-win.zip",
+      "format": "zip",
+      "sha256": "cf9969c4aaa8dc5f0cd1009989177ddecbd21da6193ffad93538ab5763494faf"
+    }
+  }
+}
