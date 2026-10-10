@@ -85,6 +85,20 @@ function validateConfig(config, { deploy = false } = {}) {
   if (!config.dispatcher?.username) missing.push('dispatcher.username');
   if (!config.dispatcher?.password || config.dispatcher.password === 'CHANGE_THIS_PASSWORD') missing.push('dispatcher.password');
   if (missing.length) throw new Error(`Configure these values in config/config.json: ${missing.join(', ')}`);
+  if (config.updates !== undefined && (!config.updates || typeof config.updates !== 'object' || Array.isArray(config.updates))) {
+    throw new Error('Invalid update configuration: updates must be an object');
+  }
+  if (config.updates?.enabled !== undefined && typeof config.updates.enabled !== 'boolean') {
+    throw new Error('Invalid update configuration: updates.enabled must be true or false');
+  }
+  if (config.updates?.manifestUrl !== undefined) {
+    try {
+      const url = new URL(config.updates.manifestUrl);
+      if (url.protocol !== 'https:') throw new Error();
+    } catch {
+      throw new Error('Invalid update configuration: updates.manifestUrl must be an HTTPS URL');
+    }
+  }
   validatePermissionConfig(config);
 }
 

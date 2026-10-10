@@ -3,6 +3,7 @@
 //        npm run build -- linux   (Linux x64)
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
@@ -14,6 +15,15 @@ if (!targets[platform]) throw new Error(`Unknown platform "${platform}". Use: ${
 const appName = 'DerailValleyBot';
 const outDir = path.join(root, 'dist', `${appName}-${pkgJson.version}-${platform}`);
 const exeName = platform === 'win' ? `${appName}.exe` : appName;
+const manifestPath = path.join(root, 'version.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+if (manifest.version !== pkgJson.version) {
+  throw new Error(`version.json (${manifest.version}) must match package.json (${pkgJson.version}) before building.`);
+}
+manifest.assets ||= {};
+for (const [key, asset] of Object.entries(manifest.assets)) {
+  if (asset.version !== pkgJson.version) delete manifest.assets[key];
+}
 
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(path.join(outDir, 'config'), { recursive: true });
@@ -31,39 +41,36 @@ execFileSync(process.execPath, [
 
 fs.copyFileSync(path.join(root, 'config', 'config.example.json'), path.join(outDir, 'config', 'config.example.json'));
 fs.copyFileSync(path.join(root, 'LICENSE'), path.join(outDir, 'LICENSE.txt'));
+fs.copyFileSync(path.join(root, 'version.json'), path.join(outDir, 'version.json'));
+const platformReadme = platform === 'win' ? 'README-WINDOWS.md' : 'README-LINUX.md';
+fs.copyFileSync(path.join(root, platformReadme), path.join(outDir, 'READ ME FIRST.md'));
+fs.copyFileSync(path.join(root, 'README.md'), path.join(outDir, 'README.md'));
+fs.copyFileSync(path.join(root, 'CHANGELOG.md'), path.join(outDir, 'CHANGELOG.md'));
 
-const run = platform === 'win' ? `Double-click ${exeName}` : `Run ./${exeName} in a terminal`;
-fs.writeFileSync(path.join(outDir, 'READ ME FIRST.txt'), [
-  `Derail Valley Discord Dispatcher v${pkgJson.version}`,
-  '================================================',
-  '',
-  'No installation required - Node.js is NOT needed.',
-  '',
-  'FIRST RUN',
-  `  1. ${run}.`,
-  '  2. A setup window will ask for your Discord bot token, application ID,',
-  '     server ID and Advanced Dispatcher System login.',
-  '  3. Your answers are saved to config\\config.json and the bot starts.',
-  '',
-  'AFTER THAT',
-  `  ${run} any time to start the bot. Close the window or press Ctrl+C to stop it.`,
-  '',
-  'CHANGING SETTINGS',
-  '  Edit config\\config.json with Notepad (roles, alert channel, board, etc.).',
-  '  Delete config\\config.json to run the setup again from scratch.',
-  '  If your dispatcher uses a self-signed certificate, put it at',
-  '  config\\dispatcher-ca.cer (or change "caFile" in config.json).',
-  '',
-  'Keep config\\config.json private - it contains your bot token and password.',
-  '',
-].join('\r\n'));
-
+let archive;
+let format;
 if (platform === 'win') {
-  const zip = `${outDir}.zip`;
-  fs.rmSync(zip, { force: true });
-  execFileSync('powershell.exe', ['-NoProfile', '-Command', `Compress-Archive -Path '${outDir}\\*' -DestinationPath '${zip}'`], { stdio: 'inherit' });
-  console.log(`\nDone! Share this zip with users:\n  ${zip}`);
+  archive = `${outDir}.zip`;
+  format = 'zip';
+  fs.rmSync(archive, { force: true });
+  execFileSync('powershell.exe', ['-NoProfile', '-Command', `Compress-Archive -Path '${outDir}\\*' -DestinationPath '${archive}'`], { stdio: 'inherit' });
 } else {
-  console.log(`\nDone! Output folder:\n  ${outDir}`);
+  archive = `${outDir}.tar.gz`;
+  format = 'tar.gz';
+  fs.rmSync(archive, { force: true });
+  execFileSync('tar', ['-czf', archive, '-C', outDir, '.'], { stdio: 'inherit' });
 }
+
+const assetName = path.basename(archive);
+const assetKey = platform === 'win' ? 'win32-x64' : 'linux-x64';
+manifest.assets[assetKey] = {
+  version: pkgJson.version,
+  url: `https://github.com/matthewmaddox1993/DV_ADSBot/releases/download/v${pkgJson.version}/${assetName}`,
+  format,
+  sha256: crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),
+};
+fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+console.log(`\nDone! Release archive:\n  ${archive}`);
+console.log(`Updated ${manifestPath} with the ${assetKey} URL and SHA-256 hash.`);
 

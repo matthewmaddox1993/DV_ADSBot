@@ -32,43 +32,14 @@ The bot may run on the Derail Valley computer or another machine on the same net
 
 ## Quick start
 
-1. Create a Discord application and bot in the [Discord Developer Portal](https://discord.com/developers/applications).
-2. Create a dedicated ADS web profile named something like `DiscordBot`.
-3. Download or clone this project and install its dependencies:
+Choose the guide for the computer that will run the bot:
 
-   ```bash
-   npm ci
-   ```
+- [Windows installation and operation](README-WINDOWS.md)
+- [Linux installation and operation](README-LINUX.md)
 
-4. Create your private configuration.
+The GitHub Release download contains a standalone executable and does not require Node.js or npm. If you want to run the bot with `npm start`, download or clone the repository's source files from GitHub instead of using the standalone release package, then install Node.js 22 or newer and run `npm ci`.
 
-   PowerShell:
-
-   ```powershell
-   Copy-Item .\config\config.example.json .\config\config.json
-   ```
-
-   Command Prompt:
-
-   ```bat
-   copy config\config.example.json config\config.json
-   ```
-
-   Linux/macOS:
-
-   ```bash
-   cp config/config.example.json config/config.json
-   ```
-
-5. Edit `config/config.json`, replacing every `PASTE_...` value and `CHANGE_THIS_PASSWORD`.
-6. Copy your ADS host's public `dispatcher-ca.cer` into the `config` folder.
-7. Start the bot:
-
-   ```bash
-   npm start
-   ```
-
-On Windows you may also launch `start.bat`; on Linux/macOS use `bash start.sh`. At startup, the bot validates and deploys all slash commands before it signs in to Discord.
+Both platform guides cover these two installation methods. In either case, first create a Discord application and a dedicated ADS web profile, then keep the generated `config/config.json` private.
 
 ## Discord setup
 
@@ -229,6 +200,15 @@ Additional rules:
 
 The board's channel and message IDs are created by `/board setup` and stored automatically in `data/board.json`; do not add them to the config.
 
+### `updates`
+
+| Key | Type / template value | Description |
+|---|---|---|
+| `enabled` | boolean, `true` | Checks GitHub at startup and installs a newer semantic version automatically. Set this to `false` to opt out. |
+| `manifestUrl` | HTTPS URL | Public `version.json` location. Keep the template URL unless you maintain a fork. |
+
+Source Git clones update only when tracked files are clean and the release branch can be fast-forwarded. Standalone builds download the matching platform archive, verify its SHA-256 checksum, install it after the running process exits, and restart. Private configuration, certificates, and runtime data are preserved.
+
 ### Debug logging
 
 Set the `DEBUG` environment variable to any non-empty value before launch to enable extra console logging. Unset it again for normal operation. There is no Discord log-channel setting in this release.
@@ -306,8 +286,9 @@ To enable alerts, set a channel and turn on the master switch:
 | `npm run dev` | Start with Node's file-watching mode for development. |
 | `npm run deploy` | Validate and deploy slash commands without starting the bot. A complete valid config is still required. |
 | `npm run check` | Syntax-check the source and validate every slash-command definition. |
+| `npm run test:updater` | Test version comparison and update-manifest validation. |
 
-For updates, stop the bot, preserve your private `config/config.json` and public ADS CA certificate, replace the application files, run `npm ci`, review the latest example for new settings, and restart.
+At every normal startup, the bot checks the public [`version.json`](version.json). A failed check or update is logged and does not prevent the installed version from starting. Set `updates.enabled` to `false` for fully manual updates.
 
 ## Troubleshooting
 
@@ -412,6 +393,7 @@ data/
   .gitkeep
   board.json            Runtime board state (created automatically)
 scripts/
+  build.js             Build standalone releases
   check-project.js
 src/
   commands/             Discord slash commands
@@ -420,13 +402,16 @@ src/
   utils/                Config, permissions, embeds, logging, and formatting
   deploy-commands.js
   index.js
+CHANGELOG.md           Release history
+README-LINUX.md        Linux installation and operation
+README-WINDOWS.md      Windows installation and operation
 ```
 
 ## Getting support
 
 When reporting a problem on the download page or project issue tracker, include:
 
-- Bot release version (currently `1.0.3`)
+- Bot release version (currently `1.0.0`)
 - Node.js version from `node --version`
 - Derail Valley and ADS versions
 - Relevant console output

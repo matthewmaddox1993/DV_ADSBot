@@ -16,6 +16,7 @@ const AlertService = require('./services/AlertService');
 const { replyError } = require('./utils/replies');
 const { canView, isAllowedGuild } = require('./utils/permissions');
 const logger = require('./utils/logger');
+const { autoUpdate } = require('./utils/updater');
 
 let client = null;
 
@@ -23,6 +24,12 @@ async function main() {
   await ensureConfig();
   const config = loadConfig();
   validateConfig(config);
+
+  const updateResult = await autoUpdate(config.updates);
+  if (updateResult.exit) {
+    process.exitCode = updateResult.exitCode || 0;
+    return;
+  }
 
   client = new Client({ intents: [GatewayIntentBits.Guilds] });
   client.commands = new Collection();

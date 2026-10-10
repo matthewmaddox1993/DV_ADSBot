@@ -39,5 +39,9 @@
     "enabled": false,
     "connectionChanges": true,
     "dispatcherEvents": true
+  },
+  "updates": {
+    "enabled": true,
+    "manifestUrl": "https://raw.githubusercontent.com/matthewmaddox1993/DV_ADSBot/main/version.json"
   }
 }
